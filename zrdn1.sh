@@ -53,7 +53,7 @@ do
 				echo "$targetID 0 0 $X $Y" >> $zrdnFile
 				continue
 			fi
-
+			isSecond=$(grep "$targetID 0 0" $zrdnFile)
 			lastX=`echo $lastInfo | cut -f 4 -d " "`
 			lastY=`echo $lastInfo | cut -f 5 -d " "`
 			sed "/$targetID/d" $zrdnFile > $temp
@@ -74,7 +74,10 @@ do
 					foundAttackedTarget=`grep $targetID $attack`
 					if [[ $foundAttackedTarget == "" ]]
 					then
-						echo "Обнаружена цель $targetName ID:$targetID с координатами $X $Y"
+						if [[ $isSecond != "" ]]
+						then
+							echo "Обнаружена цель $targetName ID:$targetID с координатами $X $Y"
+						fi
 					else
 						echo "Промах по цели ID:$targetID"
 					fi

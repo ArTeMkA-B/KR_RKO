@@ -5,7 +5,10 @@ sproFile=temp/spro.txt
 lastTargetsFile=temp/lastTargetsSpro.txt
 temp=temp/tempFileSpro.txt
 attack=temp/attackSpro.txt
-destroyDirContent=temp/destroyDirContentSpro
+destroyDirContent=temp/destroyDirContentSpro.txt
+
+log=messages/spro.txt
+pingFile=temp/pingSpro.txt
 
 sproX=3250000
 sproY=3350000
@@ -23,10 +26,15 @@ get_speed() {
 : >$temp
 : >$attack
 : >$destroyDirContent
+: >$log
 while :
 do
 	sleep 0.5
-	ls $DestroyDir > $destroyDirContent
+	if [[ $(cat $pingFile) == "ping" ]]
+	then
+		echo "live" > $pingFile
+	fi
+	ls $destroyDir > $destroyDirContent
 	for fileName in $(ls -t $targetsDir | head -30 2>/dev/null)
 	do
 		foundFile=`grep $fileName $lastTargetsFile 2>/dev/null`
@@ -53,7 +61,7 @@ do
 				echo "$targetID 0 0 $X $Y" >> $sproFile
 				continue
 			fi
-
+			isSecond=$(grep "$targetID 0 0" $sproFile)
 			lastX=`echo $lastInfo | cut -f 4 -d " "`
 			lastY=`echo $lastInfo | cut -f 5 -d " "`
 			sed "/$targetID/d" $sproFile > $temp
@@ -65,18 +73,20 @@ do
 				alreadyAttacked=`grep $targetID $destroyDirContent 2>/dev/null`
 				if [[ $alreadyAttacked == "" ]]
 				then
-					#echo "$targetID x1=$lastX y1=$lastY x2=$X y2=$Y spd=$speed"
 					foundAttackedTarget=`grep $targetID $attack`
 					if [[ $foundAttackedTarget == "" ]]
 					then
-						echo "Обнаружена цель ID:$targetID с координатами $X $Y"
+						if [[ $isSecond != "" ]]
+						then
+							echo "Обнаружена цель ID:$targetID с координатами $X $Y" >> $log
+						fi
 					else
-						echo "Промах по цели ID:$targetID"
+						echo "Промах по цели ID:$targetID" >> $log
 					fi
 					if [[ $rockets > 0 ]]
 					then
 						let rockets=$rockets-1
-						echo "Стрельба по цели ID:$targetID"
+						echo "Стрельба по цели ID:$targetID" >> $log
 						if [[ $foundAttackedTarget == "" ]]
 						then
 							echo "$targetID" >> $attack
@@ -84,7 +94,7 @@ do
 						: >$destroyDir$targetID
 					elif [[ $printNoRockets == 1 ]]
 					then
-						echo "Противоракеты в СПРО закончились"
+						echo "Противоракеты в СПРО закончились" >> $log
 						printNoRockets=0
 					fi
 				fi
@@ -97,7 +107,7 @@ do
 		foundAttackedTarget=`grep $targ $temp 2>/dev/null`
 		if [[ $foundAttackedTarget == "" ]]
 		then
-			echo "Цель ID:$targ уничтожена"
+			echo "Цель ID:$targ уничтожена" >> $log
 			sed "/$targ/d" $attack > $temp
 			cat $temp > $attack
 		fi

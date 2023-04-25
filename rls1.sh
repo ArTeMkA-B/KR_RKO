@@ -102,6 +102,11 @@ do
 				echo "$targetID 0 0 $X $Y" >> $rlsFile
 				continue
 			fi
+			firstPart=$(grep "$targetID 0 0" $rlsFile)
+			if [[ $firstPart == "" ]]
+			then
+				continue
+			fi
 
 			lastX=`echo $lastInfo | cut -f 4 -d " "`
 			lastY=`echo $lastInfo | cut -f 5 -d " "`
