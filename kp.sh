@@ -3,12 +3,12 @@
 period=10
 time=0
 
-pingFile=temp/pingSpro.txt
-logFile=logs/spro.txt
-messFile=messages/spro.txt
-objectName="СПРО"
-status=0
-N_spro=0
+pingFile=( messages/pingSpro.txt messages/pingRls1.txt messages/pingRls2.txt messages/pingRls3.txt messages/pingZrdn1.txt messages/pingZrdn2.txt messages/pingZrdn3.txt )
+logFile=( logs/spro.txt logs/rls1.txt logs/rls2.txt logs/rls3.txt logs/zrdn1.txt logs/zrdn2.txt logs/zrdn3.txt )
+messFile=( messages/spro.txt messages/rls1.txt messages/rls2.txt messages/rls3.txt messages/zrdn1.txt messages/zrdn2.txt messages/zrdn2.txt )
+objectName=( "СПРО" "РЛС1" "РЛС2" "РЛС3" "ЗРДН1" "ЗРДН2" "ЗРДН3" )
+status=( 0 0 0 0 0 0 0 )
+N_spro=( 0 0 0 0 0 0 0 )
 : >$pingFile
 : >$logFile
 

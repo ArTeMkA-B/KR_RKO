@@ -8,7 +8,7 @@ attack=temp/attackSpro.txt
 destroyDirContent=temp/destroyDirContentSpro.txt
 
 log=messages/spro.txt
-pingFile=temp/pingSpro.txt
+pingFile=messages/pingSpro.txt
 
 sproX=3250000
 sproY=3350000
