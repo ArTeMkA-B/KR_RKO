@@ -27,20 +27,20 @@ fi
 
 targetsDir=/tmp/GenTargets/Targets/
 destroyDir=/tmp/GenTargets/Destroy/
-sproFile=temp/spro.txt
-lastTargetsFile=temp/lastTargetsSpro.txt
-temp=temp/tempFileSpro.txt
-attack=temp/attackSpro.txt
-destroyDirContent=temp/destroyDirContentSpro.txt
+zrdnFile=temp/zrdn2.txt
+lastTargetsFile=temp/lastTargetsZrdn2.txt
+temp=temp/tempFileZrdn2.txt
+attack=temp/attackZrdn2.txt
+destroyDirContent=temp/destroyDirContentZrdn2
 
-messFile=messages/spro.txt
-pingFile=messages/pingSpro.txt
+messFile=messages/zrdn2.txt
+pingFile=messages/pingZrdn2.txt
 
-sproX=3250000
-sproY=3350000
-sproR=1100000
+zrdnX=4400000
+zrdnY=3700000
+zrdnR=400000
 
-rockets=10
+rockets=20
 printNoRockets=1
 
 get_speed() {
@@ -53,13 +53,12 @@ encodedSend() {
 	echo $1 | sed "y/$a/$b/" >> $messFile
 }
 
-: >$sproFile
+: >$zrdnFile
 : >$lastTargetsFile
 : >$temp
 : >$attack
 : >$destroyDirContent
 # : >$messFile
-
 while :
 do
 	sleep 0.2
@@ -67,7 +66,7 @@ do
 	then
 		echo "live" > $pingFile
 	fi
-	ls $destroyDir > $destroyDirContent
+	ls $DestroyDir > $destroyDirContent
 	for fileName in $(ls -t $targetsDir | head -30 2>/dev/null)
 	do
 		foundFile=`grep $fileName $lastTargetsFile 2>/dev/null`
@@ -85,24 +84,30 @@ do
 		Y_with_letter=`expr match "$coords" '.*\(Y[0-9]*\)'`
 		Y=${Y_with_letter:1}
 
-		get_speed $sproX $sproY $X $Y
-		if (( $speed < $sproR ))
+		get_speed $zrdnX $zrdnY $X $Y
+		if (( $speed < $zrdnR ))
 		then
-			lastInfo=$(grep $targetID $sproFile)
+			lastInfo=$(grep $targetID $zrdnFile)
 			if [[ $lastInfo == "" ]]
 			then
-				echo "$targetID 0 0 $X $Y" >> $sproFile
+				echo "$targetID 0 0 $X $Y" >> $zrdnFile
 				continue
 			fi
-			isSecond=$(grep "$targetID 0 0" $sproFile)
+			isSecond=$(grep "$targetID 0 0" $zrdnFile)
 			lastX=`echo $lastInfo | cut -f 4 -d " "`
 			lastY=`echo $lastInfo | cut -f 5 -d " "`
-			sed "/$targetID/d" $sproFile > $temp
-			cat $temp > $sproFile
-			echo "$targetID $lastX $lastY $X $Y " >> $sproFile
+			sed "/$targetID/d" $zrdnFile > $temp
+			cat $temp > $zrdnFile
+			echo "$targetID $lastX $lastY $X $Y " >> $zrdnFile
 			get_speed $lastX $lastY $X $Y
-			if (( $speed >= 8000 ))
+			if (( $speed < 1000 ))
 			then
+				if (( $speed >= 250 ))
+				then
+					targetName="Крылатая ракета"
+				else
+					targetName="Самолёт"
+				fi
 				alreadyAttacked=`grep $targetID $destroyDirContent 2>/dev/null`
 				if [[ $alreadyAttacked == "" ]]
 				then
@@ -111,7 +116,7 @@ do
 					then
 						if [[ $isSecond != "" ]]
 						then
-							encodedSend "Обнаружена цель ID:$targetID с координатами $X $Y"
+							encodedSend "Обнаружена цель $targetName ID:$targetID с координатами $X $Y"
 						fi
 					else
 						encodedSend "Промах по цели ID:$targetID"
@@ -127,7 +132,7 @@ do
 						: >$destroyDir$targetID
 					elif [[ $printNoRockets == 1 ]]
 					then
-						encodedSend "Противоракеты в СПРО закончились"
+						encodedSend "Противоракеты закончились"
 						printNoRockets=0
 					fi
 				fi

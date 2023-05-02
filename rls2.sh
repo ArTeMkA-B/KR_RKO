@@ -26,18 +26,18 @@ then
 fi
 
 targetsDir=/tmp/GenTargets/Targets/
-rlsFile=temp/rls1.txt
-lastTargetsFile=temp/lastTargetsRls1.txt
-temp=temp/tempFileRls1.txt
+rlsFile=temp/rls2.txt
+lastTargetsFile=temp/lastTargetsRls2.txt
+temp=temp/tempFileRls2.txt
 
-messFile=messages/rls1.txt
-pingFile=messages/pingRls1.txt
+messFile=messages/rls2.txt
+pingFile=messages/pingRls2.txt
 
-rlsX=9550000
-rlsY=3050000
-maxDist=4000000
-azimyt=315
-povorot=100
+rlsX=9000000
+rlsY=6000000
+maxDist=3000000
+azimyt=225
+povorot=60
 
 sproX=3250000
 sproY=3350000

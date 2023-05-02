@@ -1,4 +1,30 @@
 #!/bin/bash
+
+if [ $EUID == 0 ]
+then
+    echo "Запуск с правами администратора запрещён"
+    exit 1
+fi
+
+if [ "$(uname -s)" != "Linux" ] 
+then
+    echo "ОС отлична от Linux"
+    exit 1
+fi
+
+if [ "$SHELL" != "/bin/bash" ]
+then 
+    echo "Командный интерпретатор отличен от Bash"
+    exit 1
+fi
+
+name=$(echo $0 | rev | cut -d '/' -f 1 | cut -d '.' -f 2 | rev)
+if [ $(ps aux | grep "$name" | grep -v "grep" | wc -l) -gt 2 ]
+then
+    echo "Один экземпляр $0 уже запущен"
+    exit 1
+fi
+
 targetsDir=/tmp/GenTargets/Targets/
 destroyDir=/tmp/GenTargets/Destroy/
 zrdnFile=temp/zrdn1.txt
@@ -6,6 +32,9 @@ lastTargetsFile=temp/lastTargetsZrdn1.txt
 temp=temp/tempFileZrdn1.txt
 attack=temp/attackZrdn1.txt
 destroyDirContent=temp/destroyDirContentZrdn1
+
+messFile=messages/zrdn1.txt
+pingFile=messages/pingZrdn1.txt
 
 zrdnX=6400000
 zrdnY=3600000
@@ -18,14 +47,25 @@ get_speed() {
 	speed=`echo "sqrt(($1-$3)^2+($2-$4)^2)" | bc`
 }
 
+encodedSend() {
+	a="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ :абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0123456789"
+	b="pqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ#@абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ0123456789abcdefghijklmno"
+	echo $1 | sed "y/$a/$b/" >> $messFile
+}
+
 : >$zrdnFile
 : >$lastTargetsFile
 : >$temp
 : >$attack
 : >$destroyDirContent
+# : >$messFile
 while :
 do
-	sleep 0.5
+	sleep 0.2
+	if [[ $(cat $pingFile) == "ping" ]]
+	then
+		echo "live" > $pingFile
+	fi
 	ls $DestroyDir > $destroyDirContent
 	for fileName in $(ls -t $targetsDir | head -30 2>/dev/null)
 	do
@@ -76,15 +116,15 @@ do
 					then
 						if [[ $isSecond != "" ]]
 						then
-							echo "Обнаружена цель $targetName ID:$targetID с координатами $X $Y"
+							encodedSend "Обнаружена цель $targetName ID:$targetID с координатами $X $Y"
 						fi
 					else
-						echo "Промах по цели ID:$targetID"
+						encodedSend "Промах по цели ID:$targetID"
 					fi
 					if [[ $rockets > 0 ]]
 					then
 						let rockets=$rockets-1
-						echo "Стрельба по цели ID:$targetID"
+						encodedSend "Стрельба по цели ID:$targetID"
 						if [[ $foundAttackedTarget == "" ]]
 						then
 							echo "$targetID" >> $attack
@@ -92,7 +132,7 @@ do
 						: >$destroyDir$targetID
 					elif [[ $printNoRockets == 1 ]]
 					then
-						echo "Противоракеты в ЗРДН закончились"
+						encodedSend "Противоракеты закончились"
 						printNoRockets=0
 					fi
 				fi
@@ -105,7 +145,7 @@ do
 		foundAttackedTarget=`grep $targ $temp 2>/dev/null`
 		if [[ $foundAttackedTarget == "" ]]
 		then
-			echo "Цель ID:$targ уничтожена"
+			encodedSend "Цель ID:$targ уничтожена"
 			sed "/$targ/d" $attack > $temp
 			cat $temp > $attack
 		fi
